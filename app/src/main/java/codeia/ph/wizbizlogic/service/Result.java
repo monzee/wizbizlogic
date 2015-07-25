@@ -107,8 +107,12 @@ public class Result<Ok, Fail> {
 
             @Override
             protected void onPostExecute(Result<Ok, Fail> innerResult) {
-                if (error != null && mapError != null) {
-                    result.fail(mapError.apply(error));
+                if (error != null) {
+                    if (mapError != null) {
+                        result.fail(mapError.apply(error));
+                    } else {
+                        result.fail(null);
+                    }
                 } else {
                     innerResult.then(new Consume<Ok>() {
                         @Override
@@ -238,6 +242,13 @@ public class Result<Ok, Fail> {
         });
         if (mapError != null) {
             orElse(mapError);
+        } else {
+            orElse(new Consume<Fail>() {
+                @Override
+                public void apply(Fail value) {
+                    next.fail(null);
+                }
+            });
         }
         return next;
     }
