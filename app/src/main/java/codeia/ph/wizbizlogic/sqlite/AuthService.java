@@ -4,10 +4,10 @@ import com.yahoo.squidb.data.DatabaseDao;
 
 import codeia.ph.wizbizlogic.R;
 import codeia.ph.wizbizlogic.model.Account;
-import codeia.ph.wizbizlogic.service.Auth;
+import codeia.ph.wizbizlogic.service.AuthProtocol;
 import codeia.ph.wizbizlogic.service.Result;
 
-public class AuthService implements Auth<Integer> {
+public class AuthService implements AuthProtocol<Integer> {
     private final DatabaseDao db;
 
     public AuthService(DatabaseDao dao) {
@@ -20,13 +20,13 @@ public class AuthService implements Auth<Integer> {
             @Override
             public Result<String, Integer> apply() {
                 Account a = db.fetchByCriterion(Account.class, Account.EMAIL.eq(email),
-                        Account.PASSWORD);
+                            Account.ID, Account.PASSWORD);
                 if (a == null) {
                     return Result.error(R.string.error_unknown_user);
                 } else if (!a.getPassword().equals(password)) {
                     return Result.error(R.string.error_wrong_password);
                 } else {
-                    return Result.success("<generate auth token here>");
+                    return Result.success(String.format("via$password:%d", a.getId()));
                 }
             }
         }, new Result.Convert<Throwable, Integer>() {
@@ -49,10 +49,21 @@ public class AuthService implements Auth<Integer> {
                  if (check != null) {
                      return Result.error(R.string.error_already_registered);
                  }
-                 if (db.persist(a)) {
-                     return Result.success(Long.toString(a.getId()));
-                 } else {
-                     return Result.error(R.string.error_general);
+                 db.beginTransaction();
+                 try {
+                     if (!db.persist(a)) {
+                         return Result.error(R.string.error_general);
+                     } else {
+                         String uid = String.format("account:%d", a.getId());
+                         // when is double saving ever a good idea?
+                         // i wonder if i really have to do this here. or at all.
+                         a.setUid(uid);
+                         db.persist(a);
+                         db.setTransactionSuccessful();
+                         return Result.success(uid);
+                     }
+                 } finally {
+                     db.endTransaction();
                  }
              }
          }, new Result.Convert<Throwable, Integer>() {

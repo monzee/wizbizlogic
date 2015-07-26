@@ -131,6 +131,15 @@ public class Result<Ok, Fail> {
         return result;
     }
 
+    public static <T> Convert<T, T> identity() {
+        return new Result.Convert<T, T>() {
+            @Override
+            public T apply(T value) {
+                return value;
+            }
+        };
+    }
+
     private Ok result;
     private Fail error;
     private Consume<Ok> onResult;
@@ -217,8 +226,12 @@ public class Result<Ok, Fail> {
         }
     }
 
-    public <NewOk, NewFail> Result<NewOk, NewFail> then(final Chain<Ok, NewOk, NewFail> bind) {
+    public <NewOk, NewFail> Result<NewOk, NewFail> thenDropError(Chain<Ok, NewOk, NewFail> bind) {
         return then(bind, null);
+    }
+
+    public <NewOk> Result<NewOk, Fail> then(Chain<Ok, NewOk, Fail> bind) {
+        return then(bind, Result.<Fail>identity());
     }
 
     public <NewOk, NewFail> Result<NewOk, NewFail>

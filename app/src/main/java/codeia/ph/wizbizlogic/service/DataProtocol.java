@@ -8,21 +8,21 @@ import codeia.ph.wizbizlogic.model.Group;
 import codeia.ph.wizbizlogic.model.Product;
 import codeia.ph.wizbizlogic.model.Promo;
 
-public interface Data<Id, E> {
+public interface DataProtocol<Id, E> {
 
     Result<Group, E> getGroup(Id id);
     Result<Customer, E> getCustomer(Id id);
     Result<Product, E> getProduct(Id id);
     Result<Account, E> getAccount(Id id);
 
-    Result<Boolean, E> putGroup(Group g);
-    Result<Boolean, E> putCustomer(Customer c);
-    Result<Boolean, E> putProduct(Product p);
-    Result<Boolean, E> putAccount(Account a);
+    Result<Id, E> putGroup(Group g);
+    Result<Id, E> putCustomer(Customer c);
+    Result<Id, E> putProduct(Product p);
+    Result<Id, E> putAccount(Account a);
 
-    Result<Boolean, E> putFeedback(Feedback f);
-    Result<Boolean, E> putPromo(Promo p);
-    Result<Boolean, E> putConcern(Concern c);
+    Result<Id, E> putFeedback(Feedback f);
+    Result<Id, E> putPromo(Promo p);
+    Result<Id, E> putConcern(Concern c);
 
     Result<Many<Customer>, E> getCustomersForGroup(Id groupId);
     Result<Many<Product>, E> getProductsForGroup(Id groupId);
