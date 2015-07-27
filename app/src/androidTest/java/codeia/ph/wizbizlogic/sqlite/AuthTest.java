@@ -1,4 +1,4 @@
-package codeia.ph.wizbizlogic;
+package codeia.ph.wizbizlogic.sqlite;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
@@ -10,19 +10,17 @@ import com.yahoo.squidb.data.DatabaseDao;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import codeia.ph.wizbizlogic.R;
 import codeia.ph.wizbizlogic.model.Account;
 import codeia.ph.wizbizlogic.service.Result;
-import codeia.ph.wizbizlogic.sqlite.AuthService;
-import codeia.ph.wizbizlogic.sqlite.DataService;
-import codeia.ph.wizbizlogic.sqlite.WizardDb;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class SqliteAuthTest extends ApplicationTestCase<Application> {
+public class AuthTest extends ApplicationTestCase<Application> {
     private AuthService auth;
 
-    public SqliteAuthTest() {
+    public AuthTest() {
         super(Application.class);
     }
 

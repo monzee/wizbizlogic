@@ -24,8 +24,8 @@ public interface DataProtocol<Id, E> {
     Result<Id, E> putPromo(Promo p);
     Result<Id, E> putConcern(Concern c);
 
-    Result<Many<Customer>, E> getCustomersForGroup(Id groupId);
-    Result<Many<Product>, E> getProductsForGroup(Id groupId);
-    Result<Many<Account>, E> getAccountsForGroup(Id groupId);
+    Result<TypedCursor<Customer>, E> getCustomersForGroup(Id groupId);
+    Result<TypedCursor<Product>, E> getProductsForGroup(Id groupId);
+    Result<TypedCursor<Account>, E> getAccountsForGroup(Id groupId);
 
 }

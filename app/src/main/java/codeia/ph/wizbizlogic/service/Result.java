@@ -222,6 +222,12 @@ public class Result<Ok, Fail> {
                     next.ok(map.apply(value));
                 }
             });
+            orElse(new Consume<Fail>() {
+                @Override
+                public void apply(Fail value) {
+                    next.fail(value);
+                }
+            });
             return next;
         }
     }
@@ -313,6 +319,12 @@ public class Result<Ok, Fail> {
             return Result.error(map.apply(error));
         } else {
             final Result<Ok, NewFail> next = new Result<>();
+            then(new Consume<Ok>() {
+                @Override
+                public void apply(Ok value) {
+                    next.ok(value);
+                }
+            });
             orElse(new Consume<Fail>() {
                 @Override
                 public void apply(Fail value) {
