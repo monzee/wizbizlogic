@@ -241,7 +241,7 @@ public class Result<Ok, Fail> {
     }
 
     public <NewOk, NewFail> Result<NewOk, NewFail>
-    then(final Chain<Ok, NewOk, NewFail> bind, Convert<Fail, NewFail> mapError) {
+    then(final Chain<Ok, NewOk, NewFail> bind, final Convert<Fail, NewFail> mapError) {
         final Result<NewOk, NewFail> next = new Result<>();
         then(new Consume<Ok>() {
             @Override
@@ -259,16 +259,16 @@ public class Result<Ok, Fail> {
                 });
             }
         });
-        if (mapError != null) {
-            orElse(mapError);
-        } else {
-            orElse(new Consume<Fail>() {
-                @Override
-                public void apply(Fail value) {
+        orElse(new Consume<Fail>() {
+            @Override
+            public void apply(Fail value) {
+                if (mapError != null) {
+                    next.fail(mapError.apply(value));
+                } else {
                     next.fail(null);
                 }
-            });
-        }
+            }
+        });
         return next;
     }
 
