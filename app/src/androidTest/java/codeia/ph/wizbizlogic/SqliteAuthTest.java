@@ -40,14 +40,14 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
     }
 
     private static class Probe<T> extends CountDownLatch {
-        public T called;
+        public T state;
 
         public Probe() {
             super(1);
         }
 
-        public void here(T value) {
-            called = value;
+        public void signal(T value) {
+            state = value;
             countDown();
         }
     }
@@ -58,12 +58,12 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
             @Override
             public void apply(String token) {
                 Log.i("mz", token);
-                p.here(true);
+                p.signal(true);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertTrue(p.state);
         } catch (InterruptedException e) {
             fail("interrupted");
         }
@@ -74,18 +74,18 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
         auth.login("foo@example.com", "wrong password").then(new Result.Consume<String>() {
             @Override
             public void apply(String value) {
-                p.here(false);
+                p.signal(false);
             }
         }).orElse(new Result.Consume<Integer>() {
             @Override
             public void apply(Integer error) {
                 Log.i("mz", getString(error, "?"));
-                p.here(error == R.string.error_wrong_password);
+                p.signal(error == R.string.error_wrong_password);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertTrue(p.state);
         } catch (InterruptedException e) {
             fail("interrupted");
         }
@@ -96,18 +96,18 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
         auth.login("a@b.c", "asdflkj").then(new Result.Consume<String>() {
             @Override
             public void apply(String value) {
-                p.here(false);
+                p.signal(false);
             }
         }).orElse(new Result.Consume<Integer>() {
             @Override
             public void apply(Integer value) {
                 Log.i("mz", getString(value, "?"));
-                p.here(value == R.string.error_unknown_user);
+                p.signal(value == R.string.error_unknown_user);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertTrue(p.state);
         } catch (InterruptedException e) {
             fail("interrupted");
         }
@@ -125,18 +125,18 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
             @Override
             public void apply(String value) {
                 Log.i("mz", "logged in " + value);
-                p.here(true);
+                p.signal(true);
             }
         }).orElse(new Result.Consume<Integer>() {
             @Override
             public void apply(Integer value) {
                 Log.i("mz", getString(value, "?"));
-                p.here(false);
+                p.signal(false);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertTrue(p.state);
         } catch (InterruptedException e) {
             fail("interrupted");
         }
@@ -147,28 +147,27 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
         auth.register("foo@example.com", "asdf").then(new Result.Consume<String>() {
             @Override
             public void apply(String value) {
-                p.here(false);
+                p.signal(false);
             }
         }).orElse(new Result.Consume<Integer>() {
             @Override
             public void apply(Integer value) {
                 Log.i("mz", getString(value, "?"));
-                p.here(value == R.string.error_already_registered);
+                p.signal(value == R.string.error_already_registered);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertTrue(p.state);
         } catch (InterruptedException e) {
             fail("interrupted");
         }
     }
 
     public void testRegisterThenWrongPassword() {
-        final Probe<Boolean> p = new Probe<>();
+        final Probe<Integer> p = new Probe<>();
         final String email = "z@x.c";
-        final String password = "asdf";
-        auth.register(email, password).then(new Result.Chain<String, String, Integer>() {
+        auth.register(email, "correct.").then(new Result.Chain<String, String, Integer>() {
             @Override
             public Result<String, Integer> apply(String value) {
                 return auth.login(email, "wrong!");
@@ -176,12 +175,12 @@ public class SqliteAuthTest extends ApplicationTestCase<Application> {
         }).orElse(new Result.Consume<Integer>() {
             @Override
             public void apply(Integer value) {
-                p.here(value == R.string.error_wrong_password);
+                p.signal(value);
             }
         });
         try {
             assertTrue("timeout", p.await(1, TimeUnit.SECONDS));
-            assertTrue(p.called);
+            assertEquals(getString(p.state, "?"), p.state.intValue(), R.string.error_wrong_password);
         } catch (InterruptedException e) {
             fail("interrupted");
         }

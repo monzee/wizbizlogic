@@ -7,4 +7,5 @@ public class AccountSpec {
     public String email;
     public String password;
     public String uid;
+    public long groupId;
 }

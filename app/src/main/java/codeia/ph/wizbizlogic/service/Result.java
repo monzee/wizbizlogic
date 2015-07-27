@@ -226,7 +226,7 @@ public class Result<Ok, Fail> {
         }
     }
 
-    public <NewOk, NewFail> Result<NewOk, NewFail> thenDropError(Chain<Ok, NewOk, NewFail> bind) {
+    public <NewOk, NewFail> Result<NewOk, NewFail> thenSurely(Chain<Ok, NewOk, NewFail> bind) {
         return then(bind, null);
     }
 
