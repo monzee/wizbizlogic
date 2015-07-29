@@ -240,7 +240,7 @@ public class SpinnerTest extends ActivityInstrumentationTestCase2<MainActivity> 
             });
             onView(withId(id)).check(matches(hasDescendant(withText("l@m.n"))));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            fail("interrupted");
         }
     }
 }

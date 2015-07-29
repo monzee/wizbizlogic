@@ -43,13 +43,11 @@ class TryGetMany<T extends TableModel> implements ValueEventListener, TypedCurso
     public void onDataChange(DataSnapshot dataSnapshot) {
         for (DataSnapshot current : dataSnapshot.getChildren()) {
             MatrixCursor.RowBuilder row = data.newRow();
-            for (String key : columns) {
-                if (key.equals("_id")) {
-                    long id = DataService.COUNTER.getAndIncrement();
-                    DataService.UID_MAP.put(id, current.getKey());
-                    row.add(id);
+            for (String col : columns) {
+                if (col.equals("_id")) {
+                    row.add(DataService.getId(current.getKey()));
                 } else {
-                    row.add(current.child(key).getValue());
+                    row.add(current.child(col).getValue());
                 }
             }
         }

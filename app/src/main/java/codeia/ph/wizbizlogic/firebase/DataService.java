@@ -32,10 +32,20 @@ public class DataService implements DataProtocol<String, Integer> {
     public static final String PROMOS = APP_URL + "/promos";
     public static final String CONCERNS = APP_URL + "/concerns";
 
-    static final Map<Long, String> UID_MAP = new HashMap<>();
-    static final AtomicLong COUNTER = new AtomicLong(1);
+    private static final Map<String, Long> UID_MAP = new HashMap<>();
+    private static final AtomicLong COUNTER = new AtomicLong(1);
 
-    static FirebaseError lastError;
+    private static FirebaseError lastError;
+
+    public static long getId(String uid) {
+        if (UID_MAP.containsKey(uid)) {
+            return UID_MAP.get(uid);
+        }
+        long id = COUNTER.getAndIncrement();
+        UID_MAP.put(uid, id);
+        return id;
+    }
+
 
     @Override
     public Result<Customer, Integer> getCustomer(String id) {
@@ -145,9 +155,13 @@ public class DataService implements DataProtocol<String, Integer> {
         if (data.containsKey("_id")) {
             long id = (long) data.get("_id");
             data.remove("_id");
-            if (UID_MAP.containsKey(id)) {
-                ref.child(UID_MAP.get(id)).setValue(data, then);
-                return result;
+            // TODO: or keep a SparseArray of strings, just make sure it's always in sync with UID_MAP
+            // then it will be just O(1) search in exchange for more memory.
+            for (Map.Entry<String, Long> entry : UID_MAP.entrySet()) {
+                if (id == entry.getValue()) {
+                    ref.child(entry.getKey()).setValue(data, then);
+                    return result;
+                }
             }
         }
         ref.push().setValue(data, then);
