@@ -2,6 +2,7 @@ package codeia.ph.wizbizlogic.sqlite;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import com.yahoo.squidb.data.DatabaseDao;
 
@@ -12,6 +13,7 @@ import codeia.ph.wizbizlogic.model.Account;
 import codeia.ph.wizbizlogic.model.Customer;
 import codeia.ph.wizbizlogic.service.Result;
 
+@MediumTest
 public class GetPutTest extends ApplicationTestCase<Application> {
     private DataService service;
 

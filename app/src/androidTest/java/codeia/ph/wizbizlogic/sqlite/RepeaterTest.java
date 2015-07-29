@@ -2,6 +2,7 @@ package codeia.ph.wizbizlogic.sqlite;
 
 import android.support.test.InstrumentationRegistry;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Spinner;
 
 import com.yahoo.squidb.data.DatabaseDao;
@@ -24,6 +25,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
+@MediumTest
 public class RepeaterTest extends ActivityInstrumentationTestCase2<MainActivity> {
     private MainActivity activity;
 
@@ -97,7 +99,7 @@ public class RepeaterTest extends ActivityInstrumentationTestCase2<MainActivity>
         }).orElse(fail);
 
         try {
-            assertTrue("timeout", latch.await(1, TimeUnit.SECONDS));
+            assertTrue("timeout", latch.await(3, TimeUnit.SECONDS));
             assertEquals("wrong number of items", 4, s.getCount());
             assertTrue("wrong type", s.getSelectedItem() instanceof Customer);
             assertEquals("baz", ((Customer) s.getSelectedItem()).getName());
@@ -120,7 +122,7 @@ public class RepeaterTest extends ActivityInstrumentationTestCase2<MainActivity>
         }).orElse(fail);
 
         try {
-            assertTrue("timeout", latch.await(1, TimeUnit.SECONDS));
+            assertTrue("timeout", latch.await(3, TimeUnit.SECONDS));
             assertEquals("wrong count", 3, s.getCount());
             onView(withId(R.id.the_spinner)).check(matches(hasDescendant(withText("BKB"))));
             s.post(new Runnable() {
@@ -155,7 +157,7 @@ public class RepeaterTest extends ActivityInstrumentationTestCase2<MainActivity>
         }).orElse(fail);
 
         try {
-            assertTrue("timeout", latch.await(1, TimeUnit.SECONDS));
+            assertTrue("timeout", latch.await(3, TimeUnit.SECONDS));
             assertEquals(2, s.getCount());
             onView(withId(id)).check(matches(hasDescendant(withText("a@b.c"))));
             s.post(new Runnable() {

@@ -2,11 +2,13 @@ package codeia.ph.wizbizlogic.firebase;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
-import com.yahoo.squidb.data.DatabaseDao;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -14,6 +16,7 @@ import codeia.ph.wizbizlogic.model.Account;
 import codeia.ph.wizbizlogic.model.Customer;
 import codeia.ph.wizbizlogic.service.Result;
 
+@LargeTest
 public class GetPutTest extends ApplicationTestCase<Application> {
 
     private DataService service;
@@ -31,12 +34,13 @@ public class GetPutTest extends ApplicationTestCase<Application> {
     }
 
     @Override
-    protected void tearDown throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
         for (String path : CLEANUP) {
             Firebase ref = new Firebase(path);
             ref.removeValue();
         }
+        CLEANUP.clear();
     }
 
     public void testPutAccount() {
@@ -49,7 +53,7 @@ public class GetPutTest extends ApplicationTestCase<Application> {
             @Override
             public void apply(String value) {
                 assertNotNull(value);
-                CLEANUP.add(String.format("%s/%s", DataService.PRODUCTS, value));
+                CLEANUP.add(String.format("%s/%s", DataService.ACCOUNTS, value));
                 latch.countDown();
             }
         }).orElse(new Result.Consume<Integer>() {
@@ -100,7 +104,7 @@ public class GetPutTest extends ApplicationTestCase<Application> {
         service.putCustomer(c).then(new Result.Chain<String, Customer, Integer>() {
             @Override
             public Result<Customer, Integer> apply(String value) {
-                CLEANUP.add(String.format("%s/%s", DataService.CUSTOMERS, value);
+                CLEANUP.add(String.format("%s/%s", DataService.CUSTOMERS, value));
                 return service.getCustomer(value);
             }
         }).then(new Result.Consume<Customer>() {

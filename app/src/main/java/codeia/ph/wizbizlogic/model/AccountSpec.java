@@ -8,4 +8,5 @@ public class AccountSpec {
     public String password;
     public String uid;
     public long groupId;
+    public String groupUid;
 }

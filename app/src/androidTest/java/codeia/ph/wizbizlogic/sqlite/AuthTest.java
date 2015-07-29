@@ -2,6 +2,7 @@ package codeia.ph.wizbizlogic.sqlite;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
 import com.yahoo.squidb.data.AbstractDatabase;
@@ -14,9 +15,7 @@ import codeia.ph.wizbizlogic.R;
 import codeia.ph.wizbizlogic.model.Account;
 import codeia.ph.wizbizlogic.service.Result;
 
-/**
- * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
- */
+@MediumTest
 public class AuthTest extends ApplicationTestCase<Application> {
     private AuthService auth;
 

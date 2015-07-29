@@ -1,14 +1,13 @@
 package codeia.ph.wizbizlogic.firebase;
 
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.yahoo.squidb.data.AbstractModel;
+import com.yahoo.squidb.data.TableModel;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import codeia.ph.wizbizlogic.R;
 import codeia.ph.wizbizlogic.model.Account;
@@ -24,6 +23,7 @@ import codeia.ph.wizbizlogic.service.TypedCursor;
 
 public class DataService implements DataProtocol<String, Integer> {
     private static final String APP_URL = "https://vivid-torch-2758.firebaseio.com";
+
     public static final String CUSTOMERS = APP_URL + "/customers";
     public static final String PRODUCTS = APP_URL + "/products";
     public static final String GROUPS = APP_URL + "/groups";
@@ -32,7 +32,10 @@ public class DataService implements DataProtocol<String, Integer> {
     public static final String PROMOS = APP_URL + "/promos";
     public static final String CONCERNS = APP_URL + "/concerns";
 
-    public FirebaseError lastError;
+    static final Map<Long, String> UID_MAP = new HashMap<>();
+    static final AtomicLong COUNTER = new AtomicLong(1);
+
+    static FirebaseError lastError;
 
     @Override
     public Result<Customer, Integer> getCustomer(String id) {
@@ -66,7 +69,7 @@ public class DataService implements DataProtocol<String, Integer> {
 
     @Override
     public Result<String, Integer> putPromo(Promo p) {
-        return put(f, PROMOS);
+        return put(p, PROMOS);
     }
 
     @Override
@@ -76,17 +79,20 @@ public class DataService implements DataProtocol<String, Integer> {
 
     @Override
     public Result<TypedCursor<Customer>, Integer> getCustomersForGroup(String groupId) {
-        return Result.error(R.string.error_unimplemented);
+        TryGetMany<Customer> query = new TryGetMany<>(Customer.ID, Customer.NAME);
+        return query.start(new Firebase(CUSTOMERS).orderByChild("groupUid").equalTo(groupId));
     }
 
     @Override
     public Result<TypedCursor<Product>, Integer> getProductsForGroup(String groupId) {
-        return Result.error(R.string.error_unimplemented);
+        TryGetMany<Product> query = new TryGetMany<>(Product.ID, Product.SKU);
+        return query.start(new Firebase(PRODUCTS).orderByChild("groupUid").equalTo(groupId));
     }
 
     @Override
     public Result<TypedCursor<Account>, Integer> getAccountsForGroup(String groupId) {
-        return Result.error(R.string.error_unimplemented);
+        TryGetMany<Account> query = new TryGetMany<>(Account.ID, Account.EMAIL);
+        return query.start(new Firebase(ACCOUNTS).orderByChild("groupUid").equalTo(groupId));
     }
 
     @Override
@@ -104,61 +110,8 @@ public class DataService implements DataProtocol<String, Integer> {
         return put(a, ACCOUNTS);
     }
 
-    private static final Map<Long, String> UID_MAP = new HashMap<>();
-    private static final AtomicLong COUNTER = new AtomicLong(1);
-    private static final long TIMEOUT = 10000L;
-
-    private class TryGetOne<T extends TableModel> extends CountDownTimer implements ValueEventListener {
-        public final Result<T, Integer> result = new Result<>();
-        private final Class<T> modelClass;
-        private Firebase ref;
-
-        public TryGet(Class<T> modelClass) {
-            super(TIMEOUT, TIMEOUT);
-            this.modelClass = modelClass;
-        }
-
-        @Override
-        public void onTick(long remaining) {
-            // no-op
-        }
-
-        @OVerride
-        public void onFinish() {
-            if (ref != null) {
-                ref.removeEventListener(this);
-                result.fail(R.string.error_not_found);
-            }
-        }
-
-        @Override
-        public void onDataChange(DataSnapshot snapshot) {
-            long id = COUNTER.getAndIncrement();
-            T model = snapshot.getValue(modelClass);
-            model.setId(id);
-            UID_MAP.put(id, snapshot.getKey());
-            unlisten();
-            result.ok(model);
-        }
-
-        @Override
-        public void onCancelled(FirebaseError error) {
-            lastError = error;
-            unlisten();
-            result.fail(R.string.error_cancelled);
-        }
-
-        public void start(Firebase ref) {
-            this.ref = ref;
-            ref.addValueEventListener(this);
-            start();
-        }
-
-        private unlisten() {
-            cancel();
-            ref.removeEventListener(this);
-            ref = null;
-        }
+    public FirebaseError getLastError() {
+        return lastError;
     }
 
     private <T extends TableModel> Result<T, Integer> get(String id, Class<T> modelClass, String path) {
@@ -166,7 +119,7 @@ public class DataService implements DataProtocol<String, Integer> {
             return Result.error(R.string.error_not_found);
         }
         Firebase ref = new Firebase(path);
-        return new TryGetOne<>(modelClass).start(ref.child(id)).result;
+        return new TryGetOne<>(modelClass).start(ref.child(id));
     }
 
     private <T extends AbstractModel> Result<String, Integer> put(T model, String path) {
@@ -177,7 +130,7 @@ public class DataService implements DataProtocol<String, Integer> {
         }
 
         final Result<String, Integer> result = new Result<>();
-        Firebase.CompletionListener then = new Firebase.CompletionListener {
+        Firebase.CompletionListener then = new Firebase.CompletionListener() {
             @Override
             public void onComplete(FirebaseError error, Firebase ref) {
                 if (error == null) {
@@ -190,9 +143,9 @@ public class DataService implements DataProtocol<String, Integer> {
         };
 
         if (data.containsKey("_id")) {
-            long id = data.getLong("_id");
+            long id = (long) data.get("_id");
+            data.remove("_id");
             if (UID_MAP.containsKey(id)) {
-                data.remove("_id");
                 ref.child(UID_MAP.get(id)).setValue(data, then);
                 return result;
             }

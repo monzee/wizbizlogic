@@ -6,4 +6,5 @@ import com.yahoo.squidb.annotations.TableModelSpec;
 public class ProductSpec {
     public String sku;
     public long groupId;
+    public String groupUid;
 }
