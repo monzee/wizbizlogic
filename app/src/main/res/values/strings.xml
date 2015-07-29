@@ -9,4 +9,5 @@
     <string name="error_unknown_user">User \'%s\' does not exist</string>
     <string name="error_already_registered">User \'%s\' is already registered</string>
     <string name="error_unimplemented">Feature not implemented yet</string>
+    <string name="error_cancelled">Request was cancelled</string>
 </resources>
