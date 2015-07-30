@@ -78,7 +78,6 @@ public class MainActivity extends ActionBarActivity {
     private TypedAdapter<Product> productAdapter;
     private TypedAdapter<Account> accountAdapter;
     private Spinner spinner;
-    private ListView list;
     private TypedAdapter<Customer> listAdapter;
 
     private String groupId;
@@ -177,7 +176,7 @@ public class MainActivity extends ActionBarActivity {
         productAdapter = new ProductAdapter().buildAdapter(this, new Product());
         accountAdapter = new AccountAdapter().buildAdapter(this, new Account());
         spinner = (Spinner) findViewById(R.id.the_spinner);
-        list = (ListView) findViewById(R.id.the_list);
+        ListView list = (ListView) findViewById(R.id.the_list);
         listAdapter = new ListAdapter().buildAdapter(this, new Customer());
         list.setAdapter(listAdapter);
         Button btn = (Button) findViewById(R.id.the_button);

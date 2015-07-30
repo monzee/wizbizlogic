@@ -23,7 +23,7 @@ class TryGetOne<T extends TableModel> implements ValueEventListener {
         if (model == null) {
             result.fail(R.string.error_not_found);
         } else {
-            model.setId(DataService.getId(snapshot.getKey());
+            model.setId(DataService.getId(snapshot.getKey()));
             result.ok(model);
         }
     }

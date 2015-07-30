@@ -22,7 +22,8 @@ import codeia.ph.wizbizlogic.service.Result;
 import codeia.ph.wizbizlogic.service.TypedCursor;
 
 public class DataService implements DataProtocol<String, Integer> {
-    private static final String APP_URL = "https://vivid-torch-2758.firebaseio.com";
+    static final String APP_URL = "https://vivid-torch-2758.firebaseio.com";
+    static FirebaseError lastError;
 
     public static final String CUSTOMERS = APP_URL + "/customers";
     public static final String PRODUCTS = APP_URL + "/products";
@@ -35,7 +36,6 @@ public class DataService implements DataProtocol<String, Integer> {
     private static final Map<String, Long> UID_MAP = new HashMap<>();
     private static final AtomicLong COUNTER = new AtomicLong(1);
 
-    private static FirebaseError lastError;
 
     public static long getId(String uid) {
         if (UID_MAP.containsKey(uid)) {
